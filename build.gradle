@@ -1,0 +1,4 @@
+task repackage(type:Exec) {
+  workingDir '.'
+  commandLine './repackage.py'
+}
