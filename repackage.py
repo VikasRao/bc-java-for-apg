@@ -3,7 +3,11 @@ import os
 import shutil
 import sys
 
+SRC_DIR = 'bc-java'
+DST_DIR = '.'
 ORIGINAL_PACKAGE_NAME = 'org.bouncycastle'
+ORIGINAL_PROVIDER_NAME = 'BC'
+NEW_PROVIDER_NAME = 'BC2'
 LIBS = ('core', 'jce', 'pkix', 'pg', 'prov')
 
 def copy_and_rename(source, destination, package_name):
@@ -33,21 +37,23 @@ def copy_and_rename(source, destination, package_name):
             data = data.replace(ORIGINAL_PACKAGE_NAME, package_name)
             data = data.replace(ORIGINAL_PACKAGE_NAME.replace('.', '/'),
                                 package_name.replace('.', '/'))
+            data = data.replace('"' + ORIGINAL_PROVIDER_NAME + '"',
+                                '"' + NEW_PROVIDER_NAME + '"')
             file(fullpath, 'w').write(data)
 
 def copy_and_rename_all(package_name):
     for lib in LIBS:
         try:
-            shutil.rmtree(os.path.join(lib, 'src/main'))
+            shutil.rmtree(os.path.join(DST_DIR, lib, 'src/main'))
         except OSError:
             pass
 
     for lib in LIBS:
-        for (dirpath, dirnames, unused_filenames) in os.walk(os.path.join('bc-java', lib)):
+        for (dirpath, dirnames, unused_filenames) in os.walk(os.path.join(SRC_DIR, lib)):
             if not dirpath.endswith('src/main'):
                 continue
 
-            destination = os.path.join(lib, 'src')
+            destination = os.path.join(DST_DIR, lib, 'src')
             if not os.path.exists(destination):
                 os.makedirs(destination)
             destination = os.path.join(destination, 'main')
@@ -60,6 +66,6 @@ if __name__ == '__main__':
     if len(sys.argv) >= 2:
         package_name = sys.argv[1]
     else:
-        package_name = 'org.bouncycastle2'
+        package_name = 'org.spongycastle'
     print 'Repacking org.bouncycastle to', package_name
     copy_and_rename_all(package_name)
